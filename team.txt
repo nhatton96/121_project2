@@ -1,3 +1,5 @@
 # EG: 
 # panteater,12345678
 # peterant,87654321
+nhton,78237479
+Zwalls,35008577
