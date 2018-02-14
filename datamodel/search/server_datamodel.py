@@ -7,6 +7,7 @@ from rtypes.pcc.types.projection import projection
 from rtypes.pcc.attributes import dimension, primarykey, count
 from rtypes.pcc.types.impure import impure
 import socket, base64, requests, uuid
+from urlparse import urlparse, parse_qs, urljoin
 
 from urllib2 import Request, urlopen, HTTPError, URLError
 from urlparse import urlparse, parse_qs

@@ -10,6 +10,9 @@ from uuid import uuid4
 from urlparse import urlparse, parse_qs
 from uuid import uuid4
 
+from urlparse import urlparse, parse_qs, urljoin
+from lxml import html,etree
+
 logger = logging.getLogger(__name__)
 LOG_HEADER = "[CRAWLER]"
 
@@ -48,16 +51,14 @@ class CrawlerFrame(IApplication):
     
 def extract_next_links(rawDataObj):
     outputLinks = []
-    '''
-    rawDataObj is an object of type UrlResponse declared at L20-30
-    datamodel/search/server_datamodel.py
-    the return of this function should be a list of urls in their absolute form
-    Validation of link via is_valid function is done later (see line 42).
-    It is not required to remove duplicates that have already been downloaded. 
-    The frontier takes care of that.
+    url = rawDataObj.url
+    if rawDataObj.is_redirected:
+        url = rawDataObj.final_url
+    dom =  html.fromstring(rawDataObj.content)
     
-    Suggested library: lxml
-    '''
+    for link in dom.xpath('//a/@href'):
+        abs_url = urljoin(url, link)
+        outputLinks.append(abs_url)
     return outputLinks
 
 def is_valid(url):
