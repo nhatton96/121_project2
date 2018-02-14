@@ -7,10 +7,9 @@ import re, os
 from time import time
 from uuid import uuid4
 
-from urlparse import urlparse, parse_qs
+from urlparse import urlparse, parse_qs, urljoin
 from uuid import uuid4
 
-from urlparse import urlparse, parse_qs, urljoin
 from lxml import html,etree
 
 logger = logging.getLogger(__name__)
