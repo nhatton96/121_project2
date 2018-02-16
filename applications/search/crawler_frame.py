@@ -12,11 +12,6 @@ from uuid import uuid4
 
 from lxml import html,etree
 
-sub = dict()
-maxOut = 0
-maxUrl = ""
-
-
 logger = logging.getLogger(__name__)
 LOG_HEADER = "[CRAWLER]"
 
@@ -24,11 +19,14 @@ LOG_HEADER = "[CRAWLER]"
 @GetterSetter(OneNhtonZwallsUnProcessedLink)
 @ServerTriggers(add_server_copy, get_downloaded_content)
 class CrawlerFrame(IApplication):
-
+    
     def __init__(self, frame):
         self.starttime = time()
         self.app_id = "NhtonZwalls"
         self.frame = frame
+        self.sub = dict()
+        self.maxOut = 0
+        self.maxUrl = ""
 
 
     def initialize(self):
@@ -43,17 +41,34 @@ class CrawlerFrame(IApplication):
             link = unprocessed_links[0]
             print "Got a link to download:", link.full_url
             downloaded = link.download()
-            links = extract_next_links(downloaded)
+            links,tempsub, numlink = extract_next_links(downloaded)
             for l in links:
                 if is_valid(l):
                     self.frame.add(NhtonZwallsLink(l))
+            for k, v in tempsub.iteritems():
+                if ".ics.uci.edu" in k:
+                    self.sub[k] = self.sub.get(k,0) + v
+            if numlink > self.maxOut:
+                self.maxOut = numlink
+                self.maxUrl = link.full_url
 
     def shutdown(self):
+
+        file = open("outFile.txt",'w')   
+        file.write("Sub-domains: \n")
+        for sdm, amount in self.sub.iteritems():
+            file.write("%s : %d \n" % (sdm,amount))
+    
+        file.write("Link with max out is:")
+        file.write("%s : %d \n" % (self.maxUrl,self.maxOut))
+        file.close() 
+
         print (
             "Time time spent this session: ",
             time() - self.starttime, " seconds.")
     
 def extract_next_links(rawDataObj):
+    tempsub = dict()
     outputLinks = []
     url = rawDataObj.url
     if rawDataObj.is_redirected:
@@ -65,22 +80,11 @@ def extract_next_links(rawDataObj):
     
     for link in dom.xpath('//a/@href'):
         sub_domain = urlparse(link).hostname
-        sub[sub_domain] += 1
+        tempsub[sub_domain] = tempsub.get(sub_domain, 0) + 1
         abs_url = urljoin(url, link)
         outputLinks.append(abs_url)
-    num_link = len(outputLinks)
-    if num_link > maxOut:
-        maxOut = num_link
-        maxUrl = url
-
-    file = open("outFile",'w')
-    for sdm, amount in sub.iteritems():
-        file.write(sdm ,":", amount)
-    
-    file.write("Link with max out is:")
-    file.write(maxUrl, ":", maxOut)
-    file.close() 	
-    return outputLinks
+    num_link = len(outputLinks)	
+    return outputLinks, tempsub, num_link
 
 def is_valid(url):
     '''
