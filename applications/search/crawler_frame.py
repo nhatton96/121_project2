@@ -45,7 +45,7 @@ class CrawlerFrame(IApplication):
             links, tempsub, numlink = extract_next_links(downloaded)
             for l in links:
                 if is_valid(l):
-                    self.frame.add(NhtonZwallsLink(l))
+                    self.frame.add(NhtonZwallsLink(l))                
             for k, v in tempsub.iteritems():
                 if k:
                     if ".ics.uci.edu" in k:
@@ -116,8 +116,8 @@ def is_valid(url):
             + "|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub|dll|cnf|tgz|sha1" \
             + "|thmx|mso|arff|rtf|jar|csv"\
             + "|rm|smil|wmv|swf|wma|zip|rar|gz"\
-            + "|^.*calendar.*|^.*(/misc|/sites|/all|/themes|/modules|/profiles|/css|/field|/node|/theme){3}.*|^.*?(/.+?/).*?\1.*|^.*?/(.+?/)\2.*"
-            + ")$", parsed.path.lower())
+            + ")$", parsed.path.lower()) \
+            and not re.match("|^.*calendar.*|^.*(/misc|/sites|/all|/themes|/modules|/profiles|/css|/field|/node|/theme){3}.*|^.*?(/.+?/).*?\1.*|^.*?/(.+?/)\2.*", parsed.path.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
